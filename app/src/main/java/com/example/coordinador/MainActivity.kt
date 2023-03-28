@@ -4,13 +4,16 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.widget.TextView
+import android.widget.Toast
 import com.example.coordinador.databinding.ActivityMainBinding
+import com.google.gson.JsonArray
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.ResponseBody
+import org.json.JSONArray
 import org.json.JSONObject
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -50,12 +53,46 @@ class MainActivity : AppCompatActivity() {
             var response: ResponseBody? = null
             try {
                 response = RetrofitClient.apiService.obtenerDatos()
-                val jsonResponse = response.string() // Extrae la respuesta JSON como cadena de texto
-                val jsonObject = JSONObject(jsonResponse) // Crea un objeto JSON a partir de la cadena de texto
-                val jsonFormatted = jsonObject.toString(4) // Convierte el objeto JSON a una cadena de texto con formato legible
+
+                val cadena = response.toString()
+                val objectsJ =JSONObject(cadena)
+                val datos = objectsJ.getJSONArray("Data")
+
+                var Rid:String=""
+                var Rnombre:String=""
+                var Rapellidos:String=""
+                var RfechaNac:String=""
+                var Rtitulo:String=""
+                var Remail:String=""
+                var Rfacultad:String=""
+
+                for (i in 0 until  datos.length()){
+
+                    val respuesta = datos.getJSONObject(i)
+
+                    val id = respuesta.getString("idC")
+                    val nombre = respuesta.getString("nombres")
+                    val apellidos = respuesta.getString("apellidos")
+                    val fechaNac = respuesta.getString("fechaNac")
+                    val titulo = respuesta.getString("titulo")
+                    val email = respuesta.getString("email")
+                    val facultad = respuesta.getString("facultad")
+
+                    Rid = id
+                    Rnombre =nombre
+                    Rapellidos=apellidos
+                    RfechaNac =fechaNac
+                    Rtitulo =titulo
+                    Remail=email
+                    Rfacultad=facultad
+                }
+
+                val resultado ="Nombre: $Rid"
+
+
                 Log.d("TAG", "Solicitud HTTP realizada correctamente")
                 withContext(Dispatchers.Main) {
-                    textView.text = jsonFormatted // Muestra la respuesta en el TextView
+                    textView.text = resultado // Muestra la respuesta en el TextView
                 }
             } catch (e: Exception) {
                 Log.e("TAG", "Error al realizar la solicitud HTTP", e)
@@ -64,6 +101,6 @@ class MainActivity : AppCompatActivity() {
                 response?.close()
             }
         }
-
     }
+
 }
