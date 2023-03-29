@@ -4,9 +4,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.widget.TextView
-
 import com.example.coordinador.databinding.ActivityMainBinding
-
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -14,12 +12,10 @@ import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.ResponseBody
 import org.json.JSONArray
-
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
-import com.google.gson.Gson
-import com.google.gson.GsonBuilder
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -67,8 +63,12 @@ class MainActivity : AppCompatActivity() {
                     val titulo = objeto.getString("titulo")
                     val email = objeto.getString("email")
                     val facultad = objeto.getString("facultad")
-                    val textoMostrado = "Id: $idC\nNombre: $nombres $apellidos\nFecha de Nacimiento: $fechaNac\nTítulo: $titulo\nEmail: $email\nFacultad: $facultad"
-                    datos.add(textoMostrado)
+
+                    if (titulo != "MSc") { // Agrega la condición para filtrar los registros
+                        val mostrar = "Id: $idC\nNombre: $nombres $apellidos\nFecha de Nacimiento: $fechaNac\nTítulo: $titulo\nEmail: $email\nFacultad: $facultad"
+                        datos.add(mostrar)
+                    }
+
                 }
                 val datosFormatted = datos.joinToString("\n\n") // Convierte los datos a una cadena de texto con formato legible
                 withContext(Dispatchers.Main) {
@@ -76,7 +76,7 @@ class MainActivity : AppCompatActivity() {
                 }
             } catch (e: Exception) {
                 Log.e("TAG", "Error al realizar la solicitud HTTP", e)
-                // Maneja el error si es necesario
+
             } finally {
                 response?.close()
             }
