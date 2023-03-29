@@ -4,9 +4,9 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.widget.TextView
-import android.widget.Toast
+
 import com.example.coordinador.databinding.ActivityMainBinding
-import com.google.gson.JsonArray
+
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -14,11 +14,12 @@ import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.ResponseBody
 import org.json.JSONArray
-import org.json.JSONObject
+
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
-
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 
 class MainActivity : AppCompatActivity() {
 
@@ -48,51 +49,30 @@ class MainActivity : AppCompatActivity() {
             .create(ApiService::class.java)
     }
 
+
     fun obtenerDatos(textView: TextView) {
         CoroutineScope(Dispatchers.IO).launch {
             var response: ResponseBody? = null
             try {
                 response = RetrofitClient.apiService.obtenerDatos()
-
-                val cadena = response.toString()
-                val objectsJ =JSONObject(cadena)
-                val datos = objectsJ.getJSONArray("Data")
-
-                var Rid:String=""
-                var Rnombre:String=""
-                var Rapellidos:String=""
-                var RfechaNac:String=""
-                var Rtitulo:String=""
-                var Remail:String=""
-                var Rfacultad:String=""
-
-                for (i in 0 until  datos.length()){
-
-                    val respuesta = datos.getJSONObject(i)
-
-                    val id = respuesta.getString("idC")
-                    val nombre = respuesta.getString("nombres")
-                    val apellidos = respuesta.getString("apellidos")
-                    val fechaNac = respuesta.getString("fechaNac")
-                    val titulo = respuesta.getString("titulo")
-                    val email = respuesta.getString("email")
-                    val facultad = respuesta.getString("facultad")
-
-                    Rid = id
-                    Rnombre =nombre
-                    Rapellidos=apellidos
-                    RfechaNac =fechaNac
-                    Rtitulo =titulo
-                    Remail=email
-                    Rfacultad=facultad
+                val jsonResponse = response.string() // Extrae la respuesta JSON como cadena de texto
+                val jsonArray = JSONArray(jsonResponse) // Crea un array JSON a partir de la cadena de texto
+                val datos = mutableListOf<String>()
+                for (i in 0 until jsonArray.length()) {
+                    val objeto = jsonArray.getJSONObject(i)
+                    val idC = objeto.getString("idC")
+                    val nombres = objeto.getString("nombres")
+                    val apellidos = objeto.getString("apellidos")
+                    val fechaNac = objeto.getString("fechaNac")
+                    val titulo = objeto.getString("titulo")
+                    val email = objeto.getString("email")
+                    val facultad = objeto.getString("facultad")
+                    val textoMostrado = "Id: $idC\nNombre: $nombres $apellidos\nFecha de Nacimiento: $fechaNac\nTítulo: $titulo\nEmail: $email\nFacultad: $facultad"
+                    datos.add(textoMostrado)
                 }
-
-                val resultado ="Nombre: $Rid"
-
-
-                Log.d("TAG", "Solicitud HTTP realizada correctamente")
+                val datosFormatted = datos.joinToString("\n\n") // Convierte los datos a una cadena de texto con formato legible
                 withContext(Dispatchers.Main) {
-                    textView.text = resultado // Muestra la respuesta en el TextView
+                    textView.text = datosFormatted // Muestra la respuesta en el TextView
                 }
             } catch (e: Exception) {
                 Log.e("TAG", "Error al realizar la solicitud HTTP", e)
@@ -101,6 +81,7 @@ class MainActivity : AppCompatActivity() {
                 response?.close()
             }
         }
-    }
 
+
+    }
 }
