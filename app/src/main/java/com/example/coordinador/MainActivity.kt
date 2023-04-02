@@ -50,21 +50,28 @@ class MainActivity : AppCompatActivity() {
         CoroutineScope(Dispatchers.IO).launch {
             var response: ResponseBody? = null
             try {
+
                 response = RetrofitClient.apiService.obtenerDatos()
                 val jsonResponse = response.string() // Extrae la respuesta JSON como cadena de texto
                 val jsonArray = JSONArray(jsonResponse) // Crea un array JSON a partir de la cadena de texto
                 val datos = mutableListOf<String>()
+
                 for (i in 0 until jsonArray.length()) {
                     val objeto = jsonArray.getJSONObject(i)
                     val idC = objeto.getString("idC")
                     val nombres = objeto.getString("nombres")
                     val apellidos = objeto.getString("apellidos")
                     val fechaNac = objeto.getString("fechaNac")
-                    val titulo = objeto.getString("titulo")
+                    var titulo = objeto.getString("titulo")
                     val email = objeto.getString("email")
                     val facultad = objeto.getString("facultad")
 
-                    if (titulo != "MSc") { // Agrega la condición para filtrar los registros
+                    if (titulo == "MSc.") {
+
+                        val mostrar = "Id: $idC\nNombre: $nombres $apellidos\nFecha de Nacimiento: $fechaNac\nEmail: $email\nFacultad: $facultad"
+                        datos.add(mostrar)
+
+                    }else{
                         val mostrar = "Id: $idC\nNombre: $nombres $apellidos\nFecha de Nacimiento: $fechaNac\nTítulo: $titulo\nEmail: $email\nFacultad: $facultad"
                         datos.add(mostrar)
                     }
